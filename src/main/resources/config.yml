@@ -1,0 +1,5 @@
+msgs:
+  to: "§oYou whispered to %p: "
+  from: "§o%p whispered to you: "
+  notfound: "§cPlayer not found."
+  usage: "§cInvalid or insufficient arguments. Try §o"
