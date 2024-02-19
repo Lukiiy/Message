@@ -25,6 +25,15 @@ public class MessageCmd implements CommandExecutor {
             commandSender.sendMessage(Component.text(Message.get("msgs.notfound")));
             return true;
         }
+        if (commandSender instanceof Player) {
+            Player p = (Player) commandSender;
+            if (Boolean.parseBoolean(Message.get("canSeeCheck")) && !p.canSee(to)) {
+                commandSender.sendMessage(Component.text(Message.get("msgs.notfound")));
+                return true;
+            }
+            setReplyData(p, to);
+            setReplyData(to, p);
+        }
 
         String toMsg = Message.get("msgs.to").replace("%p", strings[0]);
         String fromMsg = Message.get("msgs.from").replace("%p", commandSender.getName());
@@ -32,14 +41,9 @@ public class MessageCmd implements CommandExecutor {
 
         commandSender.sendMessage(Component.text(toMsg).color(Message.mainColor).append(parts));
         to.sendMessage(Component.text(fromMsg).color(Message.mainColor).append(parts));
-
         to.playSound(to, Sound.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 1, 1);
-        if (commandSender instanceof Player) {
-            Player p = (Player) commandSender;
-            p.setMetadata("reply", new FixedMetadataValue(Message.getInstance(), to.getUniqueId())); // i like to use metadata plz dont kill me
-            to.setMetadata("reply", new FixedMetadataValue(Message.getInstance(), p.getUniqueId()));
-        }
-
         return true;
     }
+
+    private void setReplyData(Player p1, Player p2) {p1.setMetadata("reply", new FixedMetadataValue(Message.getInstance(), p2.getUniqueId().toString()));}
 }

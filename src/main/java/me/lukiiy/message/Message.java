@@ -29,7 +29,7 @@ public final class Message extends JavaPlugin {
 
     // the config.java file
     // TODO remake this
-    
+
     private static YamlConfiguration config;
 
     public void load() {

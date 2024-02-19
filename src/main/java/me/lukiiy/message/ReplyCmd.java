@@ -28,13 +28,8 @@ public class ReplyCmd implements CommandExecutor {
         Player player = (Player) commandSender;
 
         List<MetadataValue> data = player.getMetadata("reply");
-        if (data.isEmpty()) {
-            commandSender.sendMessage(Message.get("msgs.notfound"));
-            return true;
-        }
         Player to = Bukkit.getPlayer((UUID) Objects.requireNonNull(data.get(0).value()));
-
-        if (to == null) {
+        if (data.isEmpty() || to == null) {
             commandSender.sendMessage(Component.text(Message.get("msgs.notfound")));
             return true;
         }
