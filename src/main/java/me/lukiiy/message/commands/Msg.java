@@ -1,5 +1,6 @@
-package me.lukiiy.message;
+package me.lukiiy.message.commands;
 
+import me.lukiiy.message.Message;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -12,30 +13,31 @@ import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 
-public class MessageCmd implements CommandExecutor {
+public class Msg implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
         if (strings.length < 1) {
-            commandSender.sendMessage(Component.text(Message.get("msgs.usage") + "/msg <player> <msg>"));
+            commandSender.sendMessage(Message.get("msgs.usage") + "/msg <player> <msg>");
             return true;
         }
 
         Player to = Bukkit.getPlayer(strings[0]);
         if (to == null) {
-            commandSender.sendMessage(Component.text(Message.get("msgs.notfound")));
+            commandSender.sendMessage(Message.get("msgs.notfound"));
             return true;
         }
+
         if (commandSender instanceof Player) {
             Player p = (Player) commandSender;
             if (Boolean.parseBoolean(Message.get("canSeeCheck")) && !p.canSee(to)) {
-                commandSender.sendMessage(Component.text(Message.get("msgs.notfound")));
+                commandSender.sendMessage(Message.get("msgs.notfound"));
                 return true;
             }
             setReplyData(p, to);
             setReplyData(to, p);
         }
 
-        String toMsg = Message.get("msgs.to").replace("%p", strings[0]);
+        String toMsg = Message.get("msgs.to").replace("%p", to.getName());
         String fromMsg = Message.get("msgs.from").replace("%p", commandSender.getName());
         Component parts = LegacyComponentSerializer.legacyAmpersand().deserialize(String.join(" ", strings).substring(strings[0].length() + 1));
 
@@ -45,5 +47,5 @@ public class MessageCmd implements CommandExecutor {
         return true;
     }
 
-    private void setReplyData(Player p1, Player p2) {p1.setMetadata("reply", new FixedMetadataValue(Message.getInstance(), p2.getUniqueId().toString()));}
+    private void setReplyData(Player p1, Player p2) {p1.setMetadata("reply", new FixedMetadataValue(Message.INSTANCE, p2.getUniqueId().toString()));}
 }

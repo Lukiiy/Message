@@ -1,6 +1,6 @@
-package me.lukiiy.message;
+package me.lukiiy.message.commands;
 
-import net.kyori.adventure.text.Component;
+import me.lukiiy.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,14 +10,13 @@ import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-public class ReplyCmd implements CommandExecutor {
+public class Reply implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
         if (strings.length < 1) {
-            commandSender.sendMessage(Component.text(Message.get("msgs.usage") + "/r <msg>"));
+            commandSender.sendMessage(Message.get("msgs.usage") + "/r <msg>");
             return true;
         }
 
@@ -28,9 +27,9 @@ public class ReplyCmd implements CommandExecutor {
         Player player = (Player) commandSender;
 
         List<MetadataValue> data = player.getMetadata("reply");
-        Player to = Bukkit.getPlayer((UUID) Objects.requireNonNull(data.get(0).value()));
-        if (data.isEmpty() || to == null) {
-            commandSender.sendMessage(Component.text(Message.get("msgs.notfound")));
+        Player to = Bukkit.getPlayer(UUID.fromString(data.get(0).asString()));
+        if (to == null) {
+            commandSender.sendMessage(Message.get("msgs.notfound"));
             return true;
         }
 

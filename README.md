@@ -5,5 +5,4 @@ Also idk what am i doing the only reason this exists is to fix a "bug" with the 
 
 ### what i want to do
 
-1. convert this to kotlin
 1. actually make the config stuff better
