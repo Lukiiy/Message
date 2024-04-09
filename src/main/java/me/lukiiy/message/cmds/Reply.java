@@ -1,4 +1,4 @@
-package me.lukiiy.message.commands;
+package me.lukiiy.message.cmds;
 
 import me.lukiiy.message.Message;
 import org.bukkit.Bukkit;
@@ -6,11 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-import java.util.UUID;
 
 public class Reply implements CommandExecutor {
     @Override
@@ -26,14 +22,13 @@ public class Reply implements CommandExecutor {
         }
         Player player = (Player) commandSender;
 
-        List<MetadataValue> data = player.getMetadata("reply");
-        Player to = Bukkit.getPlayer(UUID.fromString(data.get(0).asString()));
+        Player to = Bukkit.getPlayer(Message.replyData.get(player.getUniqueId()));
         if (to == null) {
             commandSender.sendMessage(Message.get("msgs.notfound"));
             return true;
         }
 
-        Bukkit.dispatchCommand(commandSender, "msg " + to.getName() + " " + String.join(" ", strings));
+        Msg.message(commandSender, to, String.join(" ", strings));
         return true;
     }
 }

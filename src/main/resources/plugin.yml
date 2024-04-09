@@ -1,16 +1,19 @@
 name: Message
 version: '${project.version}'
 main: me.lukiiy.message.Message
-api-version: '1.20'
-load: STARTUP
+api-version: '1.19'
 authors: [Lukiiy]
 description: yet another simple minecraft messaging plugin
 commands:
   msg:
-    description: "Sends a private message to a player."
-    usage: "/<command> <player> <message>"
+    description: "Sends a private message to a player"
+    usage: '/<command> <player> <message>'
     aliases: [ tell, write, w, message, whisper ]
   r:
-    description: "Replies to a private message."
-    usage: "/<command> <message>"
+    description: "Replies to a private message"
+    usage: '/<command> <message>'
     aliases: [ reply ]
+  messagereload:
+    description: "Reloads the plugin."
+    usage: '/<command>'
+    permission: message.reload
