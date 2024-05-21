@@ -2,6 +2,7 @@ package me.lukiiy.message.cmds;
 
 import me.lukiiy.message.Message;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -15,14 +16,25 @@ import org.jetbrains.annotations.NotNull;
 public class Msg implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        if (strings.length < 1) {
-            commandSender.sendMessage(Message.get("msgs.usage") + "/msg <player> <msg>");
+        if (strings.length == 0) {
+            commandSender.sendRichMessage(Message.get("usage") + "/msg <player> <msg>");
+            return true;
+        }
+
+        if (strings[0].equalsIgnoreCase("-reload")) {
+            if (!commandSender.hasPermission("message.reload")) {
+                commandSender.sendMessage(Bukkit.permissionMessage());
+                return true;
+            }
+            Message.inst.reloadConfig();
+            Message.inst.load();
+            commandSender.sendRichMessage(Message.get("reload"));
             return true;
         }
 
         Player to = Bukkit.getPlayer(strings[0]);
         if (to == null) {
-            commandSender.sendMessage(Message.get("msgs.notfound"));
+            commandSender.sendRichMessage(Message.get("notfound"));
             return true;
         }
 
@@ -33,26 +45,24 @@ public class Msg implements CommandExecutor {
     public static void message(CommandSender sender, Player receiver, String content) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
-            if (Message.getBoolean("canSeeCheck") && !p.canSee(receiver)) {
-                sender.sendMessage(Message.get("msgs.notfound"));
+            if (!p.canSee(receiver) && Message.getBool("visibilityCheck")) {
+                sender.sendRichMessage(Message.get("notfound"));
                 return;
             }
-            if (!Message.getBoolean("selfMsg") && p.equals(receiver)) {
-                sender.sendMessage(Message.get("msgs.self"));
+            if (p.equals(receiver) && !Message.getBool("selfMsg")) {
+                sender.sendRichMessage(Message.get("self"));
                 return;
             }
             Message.replyData.put(p.getUniqueId(), receiver.getUniqueId());
             Message.replyData.put(receiver.getUniqueId(), p.getUniqueId());
         }
 
-        String toMsg = Message.get("msgs.to").replace("%p", receiver.getName());
-        String fromMsg = Message.get("msgs.from").replace("%p", sender.getName());
+        String toMsg = Message.get("to").replace("%p", receiver.getName());
+        String fromMsg = Message.get("from").replace("%p", sender.getName());
+        Component formatted = Message.getBool("formatting") ? LegacyComponentSerializer.legacyAmpersand().deserialize(content) : Component.text(content);
 
-        Component formatted = Component.text(content);
-        if (Message.getBoolean("allowFormatting")) formatted = LegacyComponentSerializer.legacyAmpersand().deserialize(content);
-
-        sender.sendMessage(Component.text(toMsg).color(Message.mainColor).append(formatted));
-        receiver.sendMessage(Component.text(fromMsg).color(Message.mainColor).append(formatted));
+        sender.sendMessage(MiniMessage.miniMessage().deserialize(toMsg).append(formatted));
+        receiver.sendMessage(MiniMessage.miniMessage().deserialize(fromMsg).append(formatted));
         receiver.playSound(receiver, Sound.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 1, 1);
     }
 }

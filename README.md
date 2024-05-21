@@ -5,8 +5,8 @@ Also idk what am i doing the only reason this exists is to fix a "bug" with the 
 
 ### Commands
 
-| Command            |          Description          |     Permission |
-|:-------------------|:-----------------------------:|---------------:|
-| `msg/tell/whisper` |  Sends a message to a player  |                |
-| `reply/r`          | Replies to a player's message |                |
-| `messagereload`    |      Reloads the plugin       | message.reload |
+| Command                |          Description          |     Permission |
+|:-----------------------|:-----------------------------:|---------------:|
+| `msg / tell / whisper` |  Sends a message to a player  |                |
+| `reply / r`            | Replies to a player's message |                |
+| `msg -reload`          |      Reloads the plugin       | message.reload |

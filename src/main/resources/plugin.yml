@@ -3,6 +3,7 @@ version: '${project.version}'
 main: me.lukiiy.message.Message
 api-version: '1.19'
 authors: [Lukiiy]
+load: STARTUP
 description: yet another simple minecraft messaging plugin
 commands:
   msg:
@@ -13,7 +14,3 @@ commands:
     description: "Replies to a private message"
     usage: '/<command> <message>'
     aliases: [ reply ]
-  messagereload:
-    description: "Reloads the plugin."
-    usage: '/<command>'
-    permission: message.reload

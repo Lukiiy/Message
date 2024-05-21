@@ -1,15 +1,16 @@
-# canSeeCheck is a small check that may improve compatibility with many Vanish plugins
-canSeeCheck: true
+# visibilityCheck checks if a player can see another player (for Vanish plugins)
+visibilityCheck: true
 
-# allowFormatting means that players can use the formatting codes (https://minecraft.wiki/w/Formatting_codes)
-allowFormatting: true
+# formatting allows players to use the formatting codes (https://minecraft.wiki/w/Formatting_codes)
+formatting: true
 
 # selfMsg allows players to message themselves.
-selfMsg: true
+selfMsg: false
 
-msgs:
-  to: "§oYou whispered to %p: "
-  from: "§o%p whispered to you: "
-  notfound: "§cPlayer not found."
-  usage: "§cInvalid or insufficient arguments. Try §o"
-  self: "§cYou can't message yourself." # Only when selfMsg = false
+msgs: # Formatted with MiniMessage (https://docs.advntr.dev/minimessage/format.html)
+  to: '<c:#b49bc7><i>You whisper to %p:</i> '
+  from: '<c:#b49bc7><i>%p whispers to you:</i> '
+  notfound: <red>Player not found.
+  usage: <red>Invalid or insufficient arguments. Try <i>
+  self: <red>You can't message yourself. # selfMsg must be set to false
+  reload: <green>Message Reload complete.
