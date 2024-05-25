@@ -43,8 +43,7 @@ public class Msg implements CommandExecutor {
     }
 
     public static void message(CommandSender sender, Player receiver, String content) {
-        if (sender instanceof Player) {
-            Player p = (Player) sender;
+        if (sender instanceof Player p) {
             if (!p.canSee(receiver) && Message.getBool("visibilityCheck")) {
                 sender.sendRichMessage(Message.get("notfound"));
                 return;

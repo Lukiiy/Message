@@ -16,13 +16,12 @@ public class Reply implements CommandExecutor {
             return true;
         }
 
-        if (!(commandSender instanceof Player)) {
-            commandSender.sendRichMessage("§cOnly players can use this command.");
+        if (!(commandSender instanceof Player p)) {
+            commandSender.sendMessage("§cOnly players can use this command.");
             return true;
         }
-        Player player = (Player) commandSender;
 
-        Player to = Bukkit.getPlayer(Message.replyData.get(player.getUniqueId()));
+        Player to = Bukkit.getPlayer(Message.replyData.get(p.getUniqueId()));
         if (to == null) {
             commandSender.sendRichMessage(Message.get("notfound"));
             return true;

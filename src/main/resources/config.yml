@@ -5,7 +5,7 @@ visibilityCheck: true
 formatting: true
 
 # selfMsg allows players to message themselves.
-selfMsg: false
+selfMsg: true
 
 msgs: # Formatted with MiniMessage (https://docs.advntr.dev/minimessage/format.html)
   to: '<c:#b49bc7><i>You whisper to %p:</i> '

@@ -24,20 +24,13 @@ public final class Message extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() {
-    }
+    public void onDisable() {}
 
-    // Config
+    // Config – I don't want to deal with this
     public void load() {
         config = getConfig();
         saveConfig();
     }
-
-    public static String get(String p) {
-        return config.getString("msgs." + p, "<red><i>Message not set.");
-    }
-
-    public static boolean getBool(String path) {
-        return config.getBoolean(path);
-    }
+    public static String get(String p) {return config.getString("msgs." + p, "<red><i>Message not set.").replace("§", "");}
+    public static boolean getBool(String path) {return config.getBoolean(path);}
 }
