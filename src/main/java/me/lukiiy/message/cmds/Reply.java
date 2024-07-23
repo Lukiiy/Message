@@ -1,6 +1,7 @@
 package me.lukiiy.message.cmds;
 
 import me.lukiiy.message.Message;
+import net.kyori.adventure.audience.Audience;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,8 +12,9 @@ import org.jetbrains.annotations.NotNull;
 public class Reply implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
+        Audience sender = Message.bukkitAudience.sender(commandSender);
         if (strings.length == 0) {
-            commandSender.sendRichMessage(Message.get("usage") + "/r <msg>");
+            Message.sendRich(sender, Message.get("usage") + "/r <msg>");
             return true;
         }
 
@@ -23,11 +25,11 @@ public class Reply implements CommandExecutor {
 
         Player to = Bukkit.getPlayer(Message.replyData.get(p.getUniqueId()));
         if (to == null) {
-            commandSender.sendRichMessage(Message.get("notfound"));
+            Message.sendRich(sender, Message.get("notfound"));
             return true;
         }
 
-        Msg.message(commandSender, to, String.join(" ", strings));
+        Message.message(commandSender, to, String.join(" ", strings));
         return true;
     }
 }

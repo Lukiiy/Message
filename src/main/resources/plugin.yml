@@ -1,7 +1,7 @@
 name: Message
 version: '${project.version}'
 main: me.lukiiy.message.Message
-api-version: '1.19'
+api-version: '1.18'
 authors: [Lukiiy]
 load: STARTUP
 description: yet another simple minecraft messaging plugin
