@@ -14,3 +14,6 @@ msgs: # Formatted with MiniMessage (https://docs.advntr.dev/minimessage/format.h
   usage: <red>Invalid or insufficient arguments. Try <i>
   self: <red>You can't message yourself. # selfMsg must be set to false
   reload: <green>Message Reload complete.
+
+# Toggles sound effect.
+sfx: true

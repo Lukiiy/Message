@@ -2,6 +2,7 @@ package me.lukiiy.message.cmds;
 
 import me.lukiiy.message.Message;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,26 +13,28 @@ import org.jetbrains.annotations.NotNull;
 public class Msg implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        Audience sender = Message.bukkitAudience.sender(commandSender);
+        Component defUsage = Message.msg("usage").append(Component.text("/msg <player> <msg>"));
+        Audience senderAudience = Message.bukkitAudience.sender(commandSender);
+
         if (strings.length == 0) {
-            Message.sendRich(sender, Message.get("usage") + "/msg <player> <msg>");
+            senderAudience.sendMessage(defUsage);
             return true;
         }
 
         if (strings[0].equals("-reload")) {
             if (!commandSender.hasPermission("message.reload")) {
-                Message.sendRich(sender, Message.get("usage") + "/msg <player> <msg>");
+                senderAudience.sendMessage(defUsage);
                 return true;
-            } // bruh
-            Message.inst.reloadConfig();
-            Message.inst.load();
-            Message.sendRich(sender, Message.get("reload"));
+            }
+
+            Message.getInstance().reloadConfig();
+            senderAudience.sendMessage(Message.msg("reload"));
             return true;
         }
 
         Player to = Bukkit.getPlayer(strings[0]);
         if (to == null) {
-            Message.sendRich(sender, Message.get("notfound"));
+            senderAudience.sendMessage(Message.msg("notfound"));
             return true;
         }
 
