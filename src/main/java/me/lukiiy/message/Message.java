@@ -14,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -57,20 +58,21 @@ public final class Message extends JavaPlugin {
     public static Component msg(String path) {return miniMessage.deserialize(configFile().getString("msgs." + path, "<red><i>Message not set. :(").replace("§", ""));}
     public static boolean getBool(String path) {return configFile().getBoolean(path);}
 
-    public static void message(CommandSender sender, Player receiver, String content) {
-        Audience senderAudience = Message.bukkitAudience.sender(sender);
+    public static void message(@NotNull CommandSender sender, @NotNull Player receiver, @NotNull String content) {
+        Audience senderAudience = bukkitAudience.sender(sender);
+        Audience receiverAudience = bukkitAudience.player(receiver);
 
-        if (sender instanceof Player p) {
-            if (!p.canSee(receiver) && getBool("visibilityCheck")) {
+        if (sender instanceof Player player) {
+            if (!player.canSee(receiver) && getBool("visibilityCheck")) {
                 senderAudience.sendMessage(msg("notfound"));
                 return;
             }
-            if (p.equals(receiver) && !getBool("selfMsg")) {
+            if (player.equals(receiver) && !getBool("selfMsg")) {
                 senderAudience.sendMessage(msg("self"));
                 return;
             }
-            Message.replyData.put(p.getUniqueId(), receiver.getUniqueId());
-            Message.replyData.put(receiver.getUniqueId(), p.getUniqueId());
+            Message.replyData.put(player.getUniqueId(), receiver.getUniqueId());
+            Message.replyData.put(receiver.getUniqueId(), player.getUniqueId());
         }
 
         Component toMsg = msg("to").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(receiver.getName()).build());
@@ -79,7 +81,7 @@ public final class Message extends JavaPlugin {
         Component formatted = getBool("formatting") ? LegacyComponentSerializer.legacyAmpersand().deserialize(content) : Component.text(content);
 
         senderAudience.sendMessage(toMsg.append(formatted));
-        Message.bukkitAudience.player(receiver).sendMessage(fromMsg.append(formatted));
+        receiverAudience.sendMessage(fromMsg.append(formatted));
 
         if (getBool("sfx")) receiver.playSound(receiver, Sound.ENTITY_CHICKEN_EGG, 1, 1);
     }
