@@ -1,5 +1,5 @@
 name: Message
-version: '4.1'
+version: '4.2'
 main: me.lukiiy.message.Message
 api-version: '1.18'
 authors: [Lukiiy]

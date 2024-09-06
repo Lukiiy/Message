@@ -27,7 +27,7 @@ public class Msg implements CommandExecutor {
                 return true;
             }
 
-            Message.getInstance().reloadConfig();
+            Message.getInstance().setupConfig();
             senderAudience.sendMessage(Message.msg("reload"));
             return true;
         }
