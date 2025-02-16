@@ -1,10 +1,10 @@
 name: Message
-version: '4.2'
+version: '5.0'
 main: me.lukiiy.message.Message
-api-version: '1.18'
-authors: [Lukiiy]
+api-version: '1.16'
 load: STARTUP
-description: yet another simple minecraft messaging plugin
+authors: [ Lukiiy ]
+description: yet another simple messaging plugin.
 commands:
   msg:
     description: "Sends a private message to a player"

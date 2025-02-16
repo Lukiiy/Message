@@ -10,10 +10,13 @@ selfMsg: true
 msgs: # Formatted with MiniMessage (https://docs.advntr.dev/minimessage/format.html)
   to: '<c:#b49bc7><i>You whisper to %p:</i> '
   from: '<c:#b49bc7><i>%p whispers to you:</i> '
-  notfound: <red>Player not found.
+  notfound: <red>No player was found
   usage: <red>Invalid or insufficient arguments. Try <i>
   self: <red>You can't message yourself. # selfMsg must be set to false
   reload: <green>Message Reload complete.
 
-# Toggles sound effect.
-sfx: true
+# Sound Effect -- set "id" to "" to disable
+sfx:
+  id: "entity.chicken.egg"
+  volume: 0.5
+  pitch: 1

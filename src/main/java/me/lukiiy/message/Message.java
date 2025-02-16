@@ -1,88 +1,103 @@
 package me.lukiiy.message;
 
-import lombok.Getter;
 import me.lukiiy.message.cmds.Msg;
 import me.lukiiy.message.cmds.Reply;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public final class Message extends JavaPlugin {
-    @Getter private static Message instance;
+    public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
-    private FileConfiguration config;
-
-    public static HashMap<UUID, UUID> replyData = new HashMap<>();
-    public static BukkitAudiences bukkitAudience;
-
-    public static final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private final HashMap<UUID, UUID> replyData = new HashMap<>();
+    public BukkitAudiences audience;
 
     @Override
     public void onEnable() {
-        instance = this;
         setupConfig();
 
-        bukkitAudience = BukkitAudiences.create(this);
+        audience = BukkitAudiences.create(this);
 
-        getCommand("msg").setExecutor(new Msg());
-        getCommand("r").setExecutor(new Reply());
+        getCommand("msg").setExecutor(new Msg(this));
+        getCommand("r").setExecutor(new Reply(this));
     }
 
     @Override
     public void onDisable() {
-        bukkitAudience.close();
+        audience.close();
+    }
+
+    public static Message getInstance() {
+        return JavaPlugin.getPlugin(Message.class);
+    }
+
+    public BukkitAudiences getAudience() {
+        return audience;
     }
 
     // Config
     public void setupConfig() {
         saveDefaultConfig();
-        config = getConfig();
-        config.options().copyDefaults(true);
+        getConfig().options().copyDefaults(true);
         saveConfig();
     }
 
-    public static FileConfiguration configFile() {return instance.config;}
+    // API
+    public @NotNull Component formattedConfigMessage(String path) {
+        return MINI_MESSAGE.deserialize(getConfig().getString("msgs." + path, "<red><i>Message not set.").replace("§", ""));
+    }
 
-    public static Component msg(String path) {return miniMessage.deserialize(configFile().getString("msgs." + path, "<red><i>Message not set. :(").replace("§", ""));}
-    public static boolean getBool(String path) {return configFile().getBoolean(path);}
+    public void message(@NotNull CommandSender sender, @NotNull Player receiver, @NotNull String content) {
+        Audience senderAudience = audience.sender(sender);
+        Audience receiverAudience = audience.player(receiver);
 
-    public static void message(@NotNull CommandSender sender, @NotNull Player receiver, @NotNull String content) {
-        Audience senderAudience = bukkitAudience.sender(sender);
-        Audience receiverAudience = bukkitAudience.player(receiver);
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
 
-        if (sender instanceof Player player) {
-            if (!player.canSee(receiver) && getBool("visibilityCheck")) {
-                senderAudience.sendMessage(msg("notfound"));
+            if (getConfig().getBoolean("visibilityCheck") && !player.canSee(receiver)) {
+                senderAudience.sendMessage(formattedConfigMessage("notfound"));
                 return;
             }
-            if (player.equals(receiver) && !getBool("selfMsg")) {
-                senderAudience.sendMessage(msg("self"));
+
+            if (!getConfig().getBoolean("selfMsg") && player.equals(receiver)) {
+                senderAudience.sendMessage(formattedConfigMessage("self"));
                 return;
             }
-            Message.replyData.put(player.getUniqueId(), receiver.getUniqueId());
-            Message.replyData.put(receiver.getUniqueId(), player.getUniqueId());
+
+            replyData.put(player.getUniqueId(), receiver.getUniqueId());
+            replyData.put(receiver.getUniqueId(), player.getUniqueId());
         }
 
-        Component toMsg = msg("to").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(receiver.getName()).build());
-        Component fromMsg = msg("from").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(sender.getName()).build());
+        Component toMsg = formattedConfigMessage("to").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(receiver.getName()).build());
+        Component fromMsg = formattedConfigMessage("from").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(sender.getName()).build());
 
-        Component formatted = getBool("formatting") ? LegacyComponentSerializer.legacyAmpersand().deserialize(content) : Component.text(content);
+        Component formatted = getConfig().getBoolean("formatting") ? LegacyComponentSerializer.legacyAmpersand().deserialize(content) : Component.text(content);
 
         senderAudience.sendMessage(toMsg.append(formatted));
         receiverAudience.sendMessage(fromMsg.append(formatted));
 
-        if (getBool("sfx")) receiver.playSound(receiver, Sound.ENTITY_CHICKEN_EGG, 1, 1);
+        // Sound effect
+        String sfxId = getConfig().getString("sfx.id", "");
+        if (!sfxId.isEmpty()) {
+            Sound sfx = Sound.sound(Key.key(sfxId), Sound.Source.PLAYER, (float) getConfig().getDouble("sfx.volume", 1), (float) getConfig().getDouble("sfx.pitch", 1));
+            receiverAudience.playSound(sfx);
+        }
+    }
+
+    public @Nullable UUID getLastReply(Player player) {
+        return replyData.get(player.getUniqueId());
     }
 }
