@@ -38,6 +38,7 @@ public final class Message extends JavaPlugin {
     @Override
     public void onDisable() {
         audience.close();
+        audience = null;
     }
 
     public static Message getInstance() {
