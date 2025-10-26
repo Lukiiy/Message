@@ -1,0 +1,8 @@
+name: Message
+version: '5.2-Paper'
+main: me.lukiiy.message.Message
+api-version: '1.21'
+load: STARTUP
+authors: [ Lukiiy ]
+description: yet another simple messaging plugin.
+folia-supported: true

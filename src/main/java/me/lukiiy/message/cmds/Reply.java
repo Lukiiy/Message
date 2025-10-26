@@ -1,46 +1,35 @@
 package me.lukiiy.message.cmds;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import me.lukiiy.message.Message;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class Reply implements CommandExecutor {
-    private final Message instance;
+public class Reply {
+    public LiteralArgumentBuilder<CommandSourceStack> main = Commands.literal("reply").requires(source -> source.getSender() instanceof Player)
+            .then(Commands.argument("message", StringArgumentType.greedyString())
+                    .executes(ctx -> {
+                        var sender = (Player) ctx.getSource().getSender();
 
-    public Reply(Message instance) {
-        this.instance = instance;
-    }
-    
-    @Override
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        Audience senderAudience = instance.getAudience().sender(commandSender);
+                        UUID replyUUID = Message.getInstance().getLastReply(sender);
+                        if (replyUUID == null || Bukkit.getPlayer(replyUUID) == null) throw new SimpleCommandExceptionType(MessageComponentSerializer.message().serialize(Message.getInstance().formattedConfigMessage("notfound"))).create();
+                        Player target = Bukkit.getPlayer(replyUUID);
 
-        if (strings.length == 0) {
-            senderAudience.sendMessage(instance.formattedConfigMessage("usage").append(Component.text("/r <msg>")));
-            return true;
-        }
+                        Message.getInstance().message(sender, target, StringArgumentType.getString(ctx, "message"));
+                        return Command.SINGLE_SUCCESS;
+                    })
+            );
 
-        if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage("§cOnly players can use this command.");
-            return true;
-        }
-
-        UUID replyUUID = instance.getLastReply((Player) commandSender);
-        if (replyUUID == null || Bukkit.getPlayer(replyUUID) == null) {
-            senderAudience.sendMessage(instance.formattedConfigMessage("notfound"));
-            return true;
-        }
-        Player to = Bukkit.getPlayer(replyUUID);
-
-        instance.message(commandSender, to, String.join(" ", strings));
-        return true;
+    public LiteralCommandNode<CommandSourceStack> register() {
+        return main.build();
     }
 }

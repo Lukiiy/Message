@@ -1,50 +1,34 @@
 package me.lukiiy.message.cmds;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import me.lukiiy.message.Message;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
-public class Msg implements CommandExecutor {
-    private final Message instance;
-    
-    public Msg(Message instance) {
-        this.instance = instance;
-    }
-    
-    @Override
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        Component defUsage = instance.formattedConfigMessage("usage").append(Component.text("/msg <player> <msg>"));
-        Audience senderAudience = instance.getAudience().sender(commandSender);
+public class Msg {
+    public LiteralArgumentBuilder<CommandSourceStack> main = Commands.literal("message")
+        .then(Commands.literal("-reload")
+                .requires(source -> source.getSender().hasPermission("message.reload"))
+                .executes(ctx -> {
+                    Message.getInstance().reloadConfig();
+                    ctx.getSource().getSender().sendMessage(Message.getInstance().formattedConfigMessage("reload"));
+                    return Command.SINGLE_SUCCESS;
+                })
+        )
 
-        if (strings.length == 0) {
-            senderAudience.sendMessage(defUsage);
-            return true;
-        }
+        .then(Commands.argument("player", ArgumentTypes.player()).then(Commands.argument("message", StringArgumentType.greedyString())
+                    .executes(ctx -> {
+                        Message.getInstance().message(ctx.getSource().getSender(), ctx.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(ctx.getSource()).getFirst(), StringArgumentType.getString(ctx, "message"));
+                        return Command.SINGLE_SUCCESS;
+                    })
+            ));
 
-        if (strings[0].equals("-reload")) {
-            if (!commandSender.hasPermission("message.reload")) {
-                senderAudience.sendMessage(defUsage);
-                return true;
-            }
-
-            instance.reloadConfig();
-            senderAudience.sendMessage(instance.formattedConfigMessage("reload"));
-            return true;
-        }
-
-        Player to = Bukkit.getPlayer(strings[0]);
-        if (to == null) {
-            senderAudience.sendMessage(instance.formattedConfigMessage("notfound"));
-            return true;
-        }
-
-        instance.message(commandSender, to, String.join(" ", strings).substring(strings[0].length() + 1));
-        return true;
+    public LiteralCommandNode<CommandSourceStack> register() {
+        return main.build();
     }
 }

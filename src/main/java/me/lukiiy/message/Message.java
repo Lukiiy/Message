@@ -1,10 +1,9 @@
 package me.lukiiy.message;
 
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import me.lukiiy.message.cmds.Msg;
 import me.lukiiy.message.cmds.Reply;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -17,36 +16,28 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public final class Message extends JavaPlugin {
     public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-
     private final HashMap<UUID, UUID> replyData = new HashMap<>();
-    public BukkitAudiences audience;
 
     @Override
     public void onEnable() {
         setupConfig();
 
-        audience = BukkitAudiences.create(this);
-
-        getCommand("msg").setExecutor(new Msg(this));
-        getCommand("r").setExecutor(new Reply(this));
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
+            event.registrar().register(new Msg().register(), "Sends a private message to a player", List.of("tell", "write", "w", "msg", "whisper"));
+            event.registrar().register(new Reply().register(), "Replies to a private message", List.of("r"));
+        });
     }
 
     @Override
-    public void onDisable() {
-        audience.close();
-        audience = null;
-    }
+    public void onDisable() {}
 
     public static Message getInstance() {
         return JavaPlugin.getPlugin(Message.class);
-    }
-
-    public BukkitAudiences getAudience() {
-        return audience;
     }
 
     // Config
@@ -62,19 +53,14 @@ public final class Message extends JavaPlugin {
     }
 
     public void message(@NotNull CommandSender sender, @NotNull Player receiver, @NotNull String content) {
-        Audience senderAudience = audience.sender(sender);
-        Audience receiverAudience = audience.player(receiver);
-
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-
+        if (sender instanceof Player player) {
             if (getConfig().getBoolean("visibilityCheck") && !player.canSee(receiver)) {
-                senderAudience.sendMessage(formattedConfigMessage("notfound"));
+                sender.sendMessage(formattedConfigMessage("notfound"));
                 return;
             }
 
             if (!getConfig().getBoolean("selfMsg") && player.equals(receiver)) {
-                senderAudience.sendMessage(formattedConfigMessage("self"));
+                sender.sendMessage(formattedConfigMessage("self"));
                 return;
             }
 
@@ -84,18 +70,14 @@ public final class Message extends JavaPlugin {
 
         Component toMsg = formattedConfigMessage("to").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(receiver.getName()).build());
         Component fromMsg = formattedConfigMessage("from").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(sender.getName()).build());
-
         Component formatted = getConfig().getBoolean("formatting") ? LegacyComponentSerializer.legacyAmpersand().deserialize(content) : Component.text(content);
 
-        senderAudience.sendMessage(toMsg.append(formatted));
-        receiverAudience.sendMessage(fromMsg.append(formatted));
+        sender.sendMessage(toMsg.append(formatted));
+        receiver.sendMessage(fromMsg.append(formatted));
 
         // Sound effect
         String sfxId = getConfig().getString("sfx.id", "");
-        if (!sfxId.isEmpty()) {
-            Sound sfx = Sound.sound(Key.key(sfxId), Sound.Source.PLAYER, (float) getConfig().getDouble("sfx.volume", 1), (float) getConfig().getDouble("sfx.pitch", 1));
-            receiverAudience.playSound(sfx);
-        }
+        if (!sfxId.isEmpty()) receiver.playSound(Sound.sound(Key.key(sfxId), Sound.Source.PLAYER, (float) getConfig().getDouble("sfx.volume", 1), (float) getConfig().getDouble("sfx.pitch", 1)));
     }
 
     public @Nullable UUID getLastReply(Player player) {
