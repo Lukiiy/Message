@@ -1,5 +1,5 @@
 name: Message
-version: '5.1'
+version: '5.1.1'
 main: me.lukiiy.message.Message
 api-version: '1.16'
 load: STARTUP

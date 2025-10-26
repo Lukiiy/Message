@@ -13,18 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public class Reply implements CommandExecutor {
-    private final Message instance;
-
-    public Reply(Message instance) {
-        this.instance = instance;
-    }
-    
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        Audience senderAudience = instance.getAudience().sender(commandSender);
+        Audience senderAudience = Message.getInstance().getAudience().sender(commandSender);
 
         if (strings.length == 0) {
-            senderAudience.sendMessage(instance.formattedConfigMessage("usage").append(Component.text("/r <msg>")));
+            senderAudience.sendMessage(Message.getInstance().formattedConfigMessage("usage").append(Component.text("/r <msg>")));
             return true;
         }
 
@@ -33,14 +27,14 @@ public class Reply implements CommandExecutor {
             return true;
         }
 
-        UUID replyUUID = instance.getLastReply((Player) commandSender);
+        UUID replyUUID = Message.getInstance().getLastReply((Player) commandSender);
         if (replyUUID == null || Bukkit.getPlayer(replyUUID) == null) {
-            senderAudience.sendMessage(instance.formattedConfigMessage("notfound"));
+            senderAudience.sendMessage(Message.getInstance().formattedConfigMessage("notfound"));
             return true;
         }
         Player to = Bukkit.getPlayer(replyUUID);
 
-        instance.message(commandSender, to, String.join(" ", strings));
+        Message.getInstance().message(commandSender, to, String.join(" ", strings));
         return true;
     }
 }

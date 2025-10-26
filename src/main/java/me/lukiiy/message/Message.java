@@ -28,11 +28,10 @@ public final class Message extends JavaPlugin {
     @Override
     public void onEnable() {
         setupConfig();
-
         audience = BukkitAudiences.create(this);
 
-        getCommand("msg").setExecutor(new Msg(this));
-        getCommand("r").setExecutor(new Reply(this));
+        getCommand("msg").setExecutor(new Msg());
+        getCommand("r").setExecutor(new Reply());
     }
 
     @Override
@@ -84,7 +83,6 @@ public final class Message extends JavaPlugin {
 
         Component toMsg = formattedConfigMessage("to").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(receiver.getName()).build());
         Component fromMsg = formattedConfigMessage("from").replaceText(TextReplacementConfig.builder().matchLiteral("%p").replacement(sender.getName()).build());
-
         Component formatted = getConfig().getBoolean("formatting") ? LegacyComponentSerializer.legacyAmpersand().deserialize(content) : Component.text(content);
 
         senderAudience.sendMessage(toMsg.append(formatted));
@@ -92,10 +90,7 @@ public final class Message extends JavaPlugin {
 
         // Sound effect
         String sfxId = getConfig().getString("sfx.id", "");
-        if (!sfxId.isEmpty()) {
-            Sound sfx = Sound.sound(Key.key(sfxId), Sound.Source.PLAYER, (float) getConfig().getDouble("sfx.volume", 1), (float) getConfig().getDouble("sfx.pitch", 1));
-            receiverAudience.playSound(sfx);
-        }
+        if (!sfxId.isEmpty()) receiverAudience.playSound(Sound.sound(Key.key(sfxId), Sound.Source.PLAYER, (float) getConfig().getDouble("sfx.volume", 1), (float) getConfig().getDouble("sfx.pitch", 1)));
     }
 
     public @Nullable UUID getLastReply(Player player) {
